@@ -3,6 +3,7 @@ const sequelize = require("./index");
 const post = require("../models/postModel");
 // const Tag = require("../models/postTagsModel");
 const postsTags = require("../models/postsTagsModel");
+const uuidv4 = require('uuidv4');
 
 const postTags = sequelize.define(
   "postTags",
@@ -14,8 +15,8 @@ const postTags = sequelize.define(
   },
   unique_string: {
     type: DataTypes.STRING,
-    allowNull: false,
     unique: true,
+    defaultValue: sequelize.fn('uuid'),
   },
   },
   {

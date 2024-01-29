@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("./index");
 // const postModel = require("../models/postModel");
 const Tag = require("../models/postTagsModel");
-const postsTags = require("../models/postsTagsModel");
+const PostsTags = require("../models/postsTagsModel");
 
 const Posts = sequelize.define(
   "posts",
@@ -75,7 +75,7 @@ const Posts = sequelize.define(
   }
 );
 
-Posts.belongsToMany(Tag, { through: 'postsTags', foreignKey: 'post_id' });
+Posts.belongsToMany(Tag, { through: 'PostsTags', foreignKey: 'post_id' });
 
 // Explicitly define addTags function
 // Posts.prototype.addTags = async function (tags) {

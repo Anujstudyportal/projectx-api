@@ -1,11 +1,13 @@
 const postModel = require("../models/postModel");
-const Tag = require("../models/postTagsModel");
-const postsTagsModel = require("../models/postsTagsModel");
+const PostTag = require("../models/postTagsModel");
+const PostsTags = require("../models/postsTagsModel");
+const Sequelize = require('sequelize');
 const { errorHandler, pagination } = require("../helpers/customHelper");
 const postController = {
   getAll: async (req, res) => {
     try {
       const pagination_data = {};
+      
       pagination_data.page = parseInt(req.query.page);
       pagination_data.per_page = parseInt(req.query.per_page);
 
@@ -35,28 +37,68 @@ const postController = {
     try {
       
       const post = await postModel.create(postData);
+      const Op = Sequelize.Op;
+      for (const tagName of tags) {
+        const existingTag = await PostTag.findOne({ where: { name: tagName } });
+  
+        if (existingTag) {
+          console.log('Tag with name', tagName, 'already exists');
+          // Optional: Add logic to handle existing tags if needed
+        } else {
+          // Create the tag if it doesn't exist
+          await PostTag.create({ name: tagName });
+        }
+      }
+  
+      // Create associations between post and tags
+      const postTags = await PostTag.findAll({ where: { name: { [Op.in]: tags } } }); // Retrieve existing or newly created tags
+      await PostsTags.bulkCreate(
+        postTags.map((tag) => ({ post_id: post.id, tag_id: tag.id }))
+      );
+
+
 
       /* ================================= */
       
+      
+      // const postTags = await PostTag.bulkCreate(
+      //   tags.map((tagName) => ({ name: tagName }))
+      // );
+  
+      // // Create associations between post and tags
+      // await PostsTags.bulkCreate(
+      //   postTags.map((tag) => ({ post_id: post.id, tag_id: tag.id }))
+      // );
+
+
+
       // for (const tagInfo of tags) {
       //   const [tag] = await Tag.findOrCreate({ where: { name: tagInfo.name, unique_string: tagInfo.unique_string } });
       //   await post.addTag(tag);
       // }
 
       // Find or create tags
-    const tagInstances = await Promise.all(
-      tags.map(async (tag) => {
-        const [tagInstance] = await Tag.findOrCreate({
-          where: { name: tag.name },
-          defaults: { unique_string: tag.unique_string },
-        });
-        return tagInstance;
-      })
-    );
+    // const tagInstances = await Promise.all(
+    //   tags.map(async (tag) => {
+    //     const [tagInstance] = await Tag.findOrCreate({
+    //       where: { name: tag.name },
+    //       defaults: { unique_string: tag.unique_string },
+    //     });
+    //     return tagInstance;
+    //   })
+    // );
 
     
-    await post.addTags(tagInstances);
-
+    // Create posts_tags associations
+    // await Promise.all(
+    //   tagInstances.map(async (tag) => {
+    //     await postsTagsModel.create({
+    //       post_id: post.id,
+    //       tag_id: tag.id,
+    //     });
+    //   })
+    // );
+      
       /* ================================= */
       
 
