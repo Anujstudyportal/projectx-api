@@ -1,8 +1,10 @@
 const postModel = require("../models/postModel");
-const PostTag = require("../models/postTagsModel");
-const PostsTags = require("../models/postsTagsModel");
-const Sequelize = require('sequelize');
+const Tag = require("../models/postTagsModel");
+const PostsTag = require("../models/postsTagsModel");
+const { sequelize, Op, Transaction }= require('sequelize');
 const { errorHandler, pagination } = require("../helpers/customHelper");
+const postValidator = require('../validationSchema/postValidator');
+
 const postController = {
   getAll: async (req, res) => {
     try {
@@ -33,29 +35,40 @@ const postController = {
   },
   addPost: async (req, res, next) => {
     let postData = req.body;
-    let tags  = req.body.tags;
+    let tagss  = req.body.tags;
+    
+    const { error } = postValidator.validate(postData);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
     try {
       
-      const post = await postModel.create(postData);
-      const Op = Sequelize.Op;
-      for (const tagName of tags) {
-        const existingTag = await PostTag.findOne({ where: { name: tagName } });
-  
-        if (existingTag) {
-          console.log('Tag with name', tagName, 'already exists');
-          // Optional: Add logic to handle existing tags if needed
-        } else {
-          // Create the tag if it doesn't exist
-          await PostTag.create({ name: tagName });
-        }
-      }
-  
-      // Create associations between post and tags
-      const postTags = await PostTag.findAll({ where: { name: { [Op.in]: tags } } }); // Retrieve existing or newly created tags
-      await PostsTags.bulkCreate(
-        postTags.map((tag) => ({ post_id: post.id, tag_id: tag.id }))
-      );
+      const transaction = await sequelize.transaction();
 
+    const post = await postModel.create(postData, { transaction });
+
+    const tags = await Promise.all(
+      tagss.map(async (tagName) => {
+        const existingTag = await Tag.findOne({ where: { name: tagName } });
+        if (existingTag) {
+          return existingTag;
+        } else {
+          return await Tag.create({ name: tagName }, { transaction });
+        }
+      })
+    );
+
+    await Promise.all(
+      tags.map(async (tag) => {
+        await PostsTag.create({ postId: post.id, tagId: tag.id }, { transaction });
+      })
+    );
+
+    await transaction.commit();
+
+    res.json({ message: 'Post created successfully', post });
+   
 
 
       /* ================================= */
@@ -102,7 +115,7 @@ const postController = {
       /* ================================= */
       
 
-      res.status(201).send(post);
+      // res.status(201).send(post);
     
     } catch (e) {
       let errors = await errorHandler(e);
