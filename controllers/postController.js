@@ -1,7 +1,7 @@
 const postModel = require("../models/postModel");
 const Tag = require("../models/postTagsModel");
 const PostsTag = require("../models/postsTagsModel");
-const { sequelize, Op, Transaction }= require('sequelize');
+const sequelize = require('../models');
 const { errorHandler, pagination } = require("../helpers/customHelper");
 const postValidator = require('../validationSchema/postValidator');
 
@@ -41,10 +41,10 @@ const postController = {
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
-
+    
+    const transaction = await sequelize.transaction();
     try {
       
-      const transaction = await sequelize.transaction();
 
     const post = await postModel.create(postData, { transaction });
 
