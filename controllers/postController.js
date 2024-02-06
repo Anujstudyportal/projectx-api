@@ -58,10 +58,11 @@ const postController = {
         }
       })
     );
-
+      console.log(post.id);
+      console.log(tags);
     await Promise.all(
       tags.map(async (tag) => {
-        await PostsTag.create({ postId: post.id, tagId: tag.id }, { transaction });
+        await PostsTag.create({ post_id: post.id, tag_id: tag.id }, { transaction });
       })
     );
 
