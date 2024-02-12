@@ -14,7 +14,7 @@ const postSchema = Joi.object({
   clicks: Joi.required(),
   published_at: Joi.date().default(Date.now),
   till_date: Joi.date().default(Date.now),
-  tags: Joi.array().items(Joi.string().required()),
+  tags: Joi.array().items(Joi.required()),
 }).unknown();
 
 module.exports = postSchema;

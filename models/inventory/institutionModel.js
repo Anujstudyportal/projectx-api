@@ -153,14 +153,14 @@ const Institution = sequelize.define(
     paranoid: true, // Enable soft deletion (deleted_at field)
   }
 );
-Institution.hasMany(institutionCampusModel, {
-  as: "campuses",
-  foreignKey: "institution_id",
-});
-Institution.hasMany(institutionVendorModel, {
-  as: "vendors",
-  foreignKey: "institution_id",
-});
+// Institution.hasMany(institutionCampusModel, {
+//   as: "campuses",
+//   foreignKey: "institution_id",
+// });
+// Institution.hasMany(institutionVendorModel, {
+//   as: "vendors",
+//   foreignKey: "institution_id",
+// });
 module.exports = {
   Institution: Institution,
   institutionCampus: institutionCampusModel,

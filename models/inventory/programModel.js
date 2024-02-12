@@ -116,18 +116,18 @@ const Program = sequelize.define(
   }
 );
 
-Program.hasMany(programCampusModel, {
-  as: "campuses",
-  foreignKey: "program_id",
-});
-Program.hasMany(programIntakeModel, {
-  as: "intakes",
-  foreignKey: "program_id",
-});
-Program.hasMany(programTestscoreModel, {
-  as: "testscores",
-  foreignKey: "program_id",
-});
+// Program.hasMany(programCampusModel, {
+//   as: "campuses",
+//   foreignKey: "program_id",
+// });
+// Program.hasMany(programIntakeModel, {
+//   as: "intakes",
+//   foreignKey: "program_id",
+// });
+// Program.hasMany(programTestscoreModel, {
+//   as: "testscores",
+//   foreignKey: "program_id",
+// });
 module.exports = {
   Program: Program,
   programCampus: programCampusModel,

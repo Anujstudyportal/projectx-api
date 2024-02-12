@@ -235,24 +235,24 @@ const Users = sequelize.define(
   }
 );
 
-async function hashPassword(password) {
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    return hashedPassword;
-  } catch (error) {
-    // console.error("Error hashing password:", error.message);
-    throw new Error("Error hashing password.");
-  }
-}
+// async function hashPassword(password) {
+//   try {
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     return hashedPassword;
+//   } catch (error) {
+//     // console.error("Error hashing password:", error.message);
+//     throw new Error("Error hashing password.");
+//   }
+// }
 
-Users.hasMany(userRolesModel, {
-  as: "roles",
-  foreignKey: "user_id",
-});
-Users.hasOne(userForgotRequestModel, {
-  as: "forgotRequest",
-  foreignKey: "user_id",
+// Users.hasMany(userRolesModel, {
+//   as: "roles",
+//   foreignKey: "user_id",
+// });
+// Users.hasOne(userForgotRequestModel, {
+//   as: "forgotRequest",
+//   foreignKey: "user_id",
   
-});
+// });
 
 module.exports = Users;

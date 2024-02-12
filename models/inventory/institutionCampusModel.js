@@ -28,9 +28,9 @@ const InstitutionCampus = sequelize.define(
   }
 );
 
-InstitutionCampus.belongsTo(campusModel, {
-  foreignKey: "campus_id",
-  as: "campusInfo",
-});
+// InstitutionCampus.belongsTo(campusModel, {
+//   foreignKey: "campus_id",
+//   as: "campusInfo",
+// });
 
 module.exports = InstitutionCampus;

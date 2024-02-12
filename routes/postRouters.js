@@ -4,6 +4,7 @@ module.exports = (router) => {
   router.post("/add", postController.addPost);
   router.put("/edit/:id", postController.updatePost);
   router.delete("/del/:id", postController.removePost);
+  router.post("/img_upload", postController.imgUploadPost);
 
   return router;
 };

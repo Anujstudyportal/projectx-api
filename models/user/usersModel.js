@@ -240,9 +240,9 @@ async function hashPassword(password) {
   }
 }
 
-Users.hasMany(userRolesModel, {
-  as: "roles",
-  foreignKey: "user_id",
-});
+// Users.hasMany(userRolesModel, {
+//   as: "roles",
+//   foreignKey: "user_id",
+// });
 
 module.exports = Users;

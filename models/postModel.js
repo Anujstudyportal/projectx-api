@@ -83,5 +83,5 @@ Posts.belongsToMany(Tag, { through: 'PostsTags', foreignKey: 'post_id' });
 // };
 // Posts.belongsToMany(Tag, { through: 'postsTags', foreignKey: 'post_id' });
 
-
+//  Posts.sync({ force: true });
 module.exports = Posts;

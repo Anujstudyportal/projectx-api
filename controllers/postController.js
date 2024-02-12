@@ -4,6 +4,17 @@ const PostsTag = require("../models/postsTagsModel");
 const sequelize = require('../models');
 const { errorHandler, pagination } = require("../helpers/customHelper");
 const postValidator = require('../validationSchema/postValidator');
+const multer = require('multer');
+
+
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.random() * 1e9;
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
 
 const postController = {
   getAll: async (req, res) => {
@@ -34,93 +45,51 @@ const postController = {
     }
   },
   addPost: async (req, res, next) => {
-    let postData = req.body;
-    let tagss  = req.body.tags;
-    
-    const { error } = postValidator.validate(postData);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-    
-    const transaction = await sequelize.transaction();
     try {
-      
-
-    const post = await postModel.create(postData, { transaction });
-
-    const tags = await Promise.all(
-      tagss.map(async (tagName) => {
-        const existingTag = await Tag.findOne({ where: { name: tagName } });
-        if (existingTag) {
-          return existingTag;
-        } else {
-          return await Tag.create({ name: tagName }, { transaction });
-        }
-      })
-    );
-      console.log(post.id);
-      console.log(tags);
-    await Promise.all(
-      tags.map(async (tag) => {
-        await PostsTag.create({ post_id: post.id, tag_id: tag.id }, { transaction });
-      })
-    );
-
-    await transaction.commit();
-
-    res.json({ message: 'Post created successfully', post });
-   
-
-
-      /* ================================= */
-      
-      
-      // const postTags = await PostTag.bulkCreate(
-      //   tags.map((tagName) => ({ name: tagName }))
-      // );
+      const postData = req.body;
+      const tagss = req.body.tags;
   
-      // // Create associations between post and tags
-      // await PostsTags.bulkCreate(
-      //   postTags.map((tag) => ({ post_id: post.id, tag_id: tag.id }))
-      // );
-
-
-
-      // for (const tagInfo of tags) {
-      //   const [tag] = await Tag.findOrCreate({ where: { name: tagInfo.name, unique_string: tagInfo.unique_string } });
-      //   await post.addTag(tag);
-      // }
-
-      // Find or create tags
-    // const tagInstances = await Promise.all(
-    //   tags.map(async (tag) => {
-    //     const [tagInstance] = await Tag.findOrCreate({
-    //       where: { name: tag.name },
-    //       defaults: { unique_string: tag.unique_string },
-    //     });
-    //     return tagInstance;
-    //   })
-    // );
-
-    
-    // Create posts_tags associations
-    // await Promise.all(
-    //   tagInstances.map(async (tag) => {
-    //     await postsTagsModel.create({
-    //       post_id: post.id,
-    //       tag_id: tag.id,
-    //     });
-    //   })
-    // );
-      
-      /* ================================= */
-      
-
-      // res.status(201).send(post);
-    
-    } catch (e) {
-      let errors = await errorHandler(e);
-      res.status(400).json({ errors: errors });
+      const { error } = postValidator.validate(postData, { abortEarly: false });
+  
+      if (error) {
+        const errorMessages = error.details.map((detail) => detail.message);
+        return res.status(400).json({ message: errorMessages });
+      }
+  
+      // Start a transaction
+      const t = await sequelize.transaction();
+  
+      try {
+        // Create the post within the transaction
+        const post = await postModel.create(postData, { transaction: t });
+  
+        // Create tags within the transaction
+        const postTags = await Tag.bulkCreate(
+          tagss.map((tagName) => ({ name: tagName })),
+          { transaction: t } // Pass the transaction to bulkCreate
+        );
+  
+        // Create associations within the transaction
+        await PostsTag.bulkCreate(
+          postTags.map((tag) => ({ post_id: post.id, tag_id: tag.id })),
+          { transaction: t } // Pass the transaction again
+        );
+  
+        // Commit the transaction if all operations succeed
+        await t.commit();
+  
+        res.status(201).send(post);
+      } catch (e) {
+        // Rollback the transaction if any operation fails
+        await t.rollback();
+  
+        let errors = await errorHandler(e);
+        res.status(400).json({ errors: errors });
+      }
+    } catch (error) {
+      // Handle any errors outside the transaction
+      console.error(error); // Log the error for debugging
+      next(error); // Pass the error to Express error handling middleware
     }
   },
   updatePost: async (req, res, next) => {
@@ -137,7 +106,8 @@ const postController = {
       }
     } catch (e) {
       let errors = await errorHandler(e);
-      res.status(400).json({ errors: errors });
+      next(error);
+      // res.status(400).json({ errors: errors });
     }
   },
   removePost: async (req, res, next) => {
@@ -159,6 +129,20 @@ const postController = {
       res.status(400).json({ errors: errors });
     }
   },
+
+  imgUploadPost:async(req, res, next) => {
+     const img = req.doby;
+     console.log(img); 
+    try {
+      
+    } catch (error) {
+      // Handle any errors outside the transaction
+      console.error(error); // Log the error for debugging
+      next(error); // Pass the error to Express error handling middleware
+    }
+  }
+
+
 };
 
 module.exports = postController;

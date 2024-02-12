@@ -44,8 +44,8 @@ const InstitutionVendor = sequelize.define(
     paranoid: true, // Enable soft delete
   }
 );
-InstitutionVendor.belongsTo(vendorModel, {
-  foreignKey: "vendor_id",
-  as: "vendorInfo",
-});
+// InstitutionVendor.belongsTo(vendorModel, {
+//   foreignKey: "vendor_id",
+//   as: "vendorInfo",
+// });
 module.exports = InstitutionVendor;

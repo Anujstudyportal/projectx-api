@@ -24,5 +24,5 @@ const postsTags = sequelize.define(
     paranoid: true,
   }
 );
-
+// postsTags.sync({ force: true });
 module.exports = postsTags;

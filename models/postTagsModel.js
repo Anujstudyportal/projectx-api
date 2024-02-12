@@ -30,5 +30,5 @@ const postTags = sequelize.define(
 );
 
 // postTags.belongsToMany(post, { through: 'postsTags', foreignKey: 'tag_id' });
-
+// postTags.sync({ force: true });
 module.exports = postTags;
